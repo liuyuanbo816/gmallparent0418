@@ -31,10 +31,32 @@ public class ManageServiceImpl implements ManageService {
     private BaseAttrInfoMapper baseAttrInfoMapper;
     @Resource
     private BaseAttrValueMapper baseAttrValueMapper;
+
+    @Override
+    public BaseAttrInfo getBaseAttrInfo(Long attrId) {
+        BaseAttrInfo baseAttrInfo=baseAttrInfoMapper.selectById(attrId);
+        if (baseAttrInfo!=null){
+            baseAttrInfo.setAttrValueList(this.getAttrValueList(attrId));
+        }
+        return baseAttrInfo;
+    }
+
+    @Override
+    public List<BaseAttrValue> getAttrValueList(Long attrId) {
+        return  baseAttrValueMapper.selectList(new QueryWrapper<BaseAttrValue>().eq("attr_id",attrId));
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveAttrInfo(BaseAttrInfo baseAttrInfo) {
-        baseAttrInfoMapper.insert(baseAttrInfo);
+        if (baseAttrInfo.getId()!=null){//修改，先删除再添加
+            baseAttrInfoMapper.updateById(baseAttrInfo);
+            //无法修改valuelist，先进行删除
+            baseAttrValueMapper.delete(new QueryWrapper<BaseAttrValue>().eq("attr_id",baseAttrInfo.getId()));
+        }else {//删除
+            baseAttrInfoMapper.insert(baseAttrInfo);
+        }
+
         List<BaseAttrValue> attrValueList = baseAttrInfo.getAttrValueList();
         if (!CollectionUtils.isEmpty(attrValueList)){
             attrValueList.forEach(baseAttrValue->{

@@ -1,10 +1,7 @@
 package com.atguigu.gmall.product.controller;
 
 import com.atguigu.gmall.common.result.Result;
-import com.atguigu.gmall.model.product.BaseAttrInfo;
-import com.atguigu.gmall.model.product.BaseCategory1;
-import com.atguigu.gmall.model.product.BaseCategory2;
-import com.atguigu.gmall.model.product.BaseCategory3;
+import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.service.ManageService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,10 +57,21 @@ public class BaseManageController {
         return Result.ok(baseAttrInfoList);
     }
 ///admin/product/saveAttrInfo
-//    保存平台属性
+//    通过判定attrid是否存在，进行保存平台属性或删除平台属性
     @PostMapping("saveAttrInfo")
     public Result saveAttrInfo(@RequestBody BaseAttrInfo baseAttrInfo){
         manageService.saveAttrInfo(baseAttrInfo);
         return Result.ok();
     }
+//   "/getAttrValueList/{attrId}"
+//    通过attrid查询平台属性值并show
+    @GetMapping("getAttrValueList/{attrId}")
+    public Result getAttrValueList(@PathVariable Long attrId){
+//        List<BaseAttrValue> baseAttrValueList=manageService.getAttrValueList(attrId);
+        //业务需求进行修改，先查询平台属性，再获得平台属性值
+       BaseAttrInfo baseAttrInfo=manageService.getBaseAttrInfo(attrId);
+        return Result.ok(baseAttrInfo.getAttrValueList());
+    }
+
+
 }

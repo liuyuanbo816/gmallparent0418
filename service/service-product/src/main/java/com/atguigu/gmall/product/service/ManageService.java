@@ -1,9 +1,6 @@
 package com.atguigu.gmall.product.service;
 
-import com.atguigu.gmall.model.product.BaseAttrInfo;
-import com.atguigu.gmall.model.product.BaseCategory1;
-import com.atguigu.gmall.model.product.BaseCategory2;
-import com.atguigu.gmall.model.product.BaseCategory3;
+import com.atguigu.gmall.model.product.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,4 +23,9 @@ public interface ManageService {
     List<BaseAttrInfo> selectAttrInfoList(Long category1Id, Long category2Id, Long category3Id);
 
     void saveAttrInfo(BaseAttrInfo baseAttrInfo);
+
+    List<BaseAttrValue> getAttrValueList(Long attrId);
+
+    BaseAttrInfo getBaseAttrInfo(Long attrId);
+
 }
