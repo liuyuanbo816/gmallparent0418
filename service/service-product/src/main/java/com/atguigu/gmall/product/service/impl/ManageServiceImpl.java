@@ -4,6 +4,8 @@ import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.mapper.*;
 import com.atguigu.gmall.product.service.ManageService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -31,6 +33,23 @@ public class ManageServiceImpl implements ManageService {
     private BaseAttrInfoMapper baseAttrInfoMapper;
     @Resource
     private BaseAttrValueMapper baseAttrValueMapper;
+
+    @Resource
+    private SpuInfoMapper spuInfoMapper;
+
+    @Resource
+    private BaseSaleAttrMapper baseSaleAttrMapper;
+
+    @Override
+    public List<BaseSaleAttr> getBaseSaleAttrList() {
+
+        return baseSaleAttrMapper.selectList(null);
+    }
+
+    @Override
+    public IPage<SpuInfo> getSpuInfoPage(Page<SpuInfo> spuInfoPage, SpuInfo spuInfo) {
+        return spuInfoMapper.selectPage(spuInfoPage,new QueryWrapper<SpuInfo>().eq("category3_id",spuInfo.getCategory3Id()).orderByDesc("id"));
+    }
 
     @Override
     public BaseAttrInfo getBaseAttrInfo(Long attrId) {

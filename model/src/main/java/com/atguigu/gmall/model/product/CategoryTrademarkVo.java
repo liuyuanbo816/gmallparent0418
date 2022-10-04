@@ -27,7 +27,5 @@ public class CategoryTrademarkVo {
 	@ApiModelProperty(value = "品牌id")
 	private List<Long> trademarkIdList;
 
-
-
 }
 

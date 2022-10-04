@@ -1,6 +1,8 @@
 package com.atguigu.gmall.product.service;
 
 import com.atguigu.gmall.model.product.*;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,5 +29,9 @@ public interface ManageService {
     List<BaseAttrValue> getAttrValueList(Long attrId);
 
     BaseAttrInfo getBaseAttrInfo(Long attrId);
+
+    IPage<SpuInfo> getSpuInfoPage(Page<SpuInfo> spuInfoPage, SpuInfo spuInfo);
+
+    List<BaseSaleAttr> getBaseSaleAttrList();
 
 }
