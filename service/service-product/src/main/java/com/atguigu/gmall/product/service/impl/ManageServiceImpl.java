@@ -40,6 +40,129 @@ public class ManageServiceImpl implements ManageService {
     @Resource
     private BaseSaleAttrMapper baseSaleAttrMapper;
 
+    @Resource
+    private SpuImageMapper spuImageMapper;
+    @Resource
+    private SpuPosterMapper spuPosterMapper;
+    @Resource
+    private SpuSaleAttrMapper spuSaleAttrMapper;
+    @Resource
+    private SpuSaleAttrValueMapper spuSaleAttrValueMapper;
+    @Resource
+    private SkuInfoMapper skuInfoMapper;
+    @Resource
+    private SkuImageMapper skuImageMapper;
+    @Resource
+    private SkuAttrValueMapper skuAttrValueMapper;
+    @Resource
+    private SkuSaleAttrValueMapper skuSaleAttrValueMapper;
+
+    @Override
+    public void cancelSale(Long skuId) {
+        SkuInfo skuInfo = new SkuInfo();
+        skuInfo.setId(skuId);
+        skuInfo.setIsSale(0);
+        skuInfoMapper.updateById(skuInfo);
+    }
+
+    @Override
+    public void onSale(Long skuId) {
+        SkuInfo skuInfo = new SkuInfo();
+        skuInfo.setId(skuId);
+        skuInfo.setIsSale(1);
+        skuInfoMapper.updateById(skuInfo);
+    }
+
+    @Override
+    public IPage getSkuInfoPage(Page<SkuInfo> skuInfoPage, SkuInfo skuInfo) {
+        return skuInfoMapper.selectPage(skuInfoPage,new QueryWrapper<SkuInfo>().eq("category3_id",skuInfo.getCategory3Id()).orderByDesc("id"));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveSkuInfo(SkuInfo skuInfo) {
+//        调用mapper接口修改表数据，注意前端传参可能与表字段不一定一致
+//        sku_attr_value
+//sku_image
+//sku_info
+//sku_sale_attr_value
+        skuInfoMapper.insert(skuInfo);
+        List<SkuImage> skuImageList = skuInfo.getSkuImageList();
+        if (!CollectionUtils.isEmpty(skuImageList)){
+            skuImageList.forEach(skuImage -> {
+                skuImage.setSkuId(skuInfo.getId());
+                skuImageMapper.insert(skuImage);
+            });
+        }
+        List<SkuAttrValue> skuAttrValueList = skuInfo.getSkuAttrValueList();
+        if (!CollectionUtils.isEmpty(skuAttrValueList)){
+            skuAttrValueList.forEach(skuAttrValue -> {
+                skuAttrValue.setSkuId(skuInfo.getId());
+                skuAttrValueMapper.insert(skuAttrValue);
+            });
+        }
+        List<SkuSaleAttrValue> skuSaleAttrValueList = skuInfo.getSkuSaleAttrValueList();
+        if (!CollectionUtils.isEmpty(skuSaleAttrValueList)){
+            skuSaleAttrValueList.forEach(skuSaleAttrValue -> {
+                skuSaleAttrValue.setSkuId(skuInfo.getId());
+                skuSaleAttrValue.setSpuId(skuInfo.getSpuId());
+                skuSaleAttrValueMapper.insert(skuSaleAttrValue);
+            });
+        }
+
+    }
+
+    @Override
+    public List<SpuSaleAttr> getSpuSaleAttrList(Long spuId) {
+        List<SpuSaleAttr> spuSaleAttrList=spuSaleAttrMapper.getSpuSaleAttrList(spuId);
+        return spuSaleAttrList;
+    }
+
+    @Override
+    public List<SpuImage> getSpuImageList(Long spuId) {
+        return spuImageMapper.selectList(new QueryWrapper<SpuImage>().eq("spu_id",spuId));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveSpuInfo(SpuInfo spuInfo) {
+        //1找表spu_image
+        //spu_info
+        //spu_poster
+        //spu_sale_attr
+        //spu_sale_attr_value
+        spuInfoMapper.insert(spuInfo);
+        List<SpuImage> spuImageList = spuInfo.getSpuImageList();
+        if (!CollectionUtils.isEmpty(spuImageList)){
+            spuImageList.forEach(spuImage -> {
+                spuImage.setSpuId(spuInfo.getId());
+                spuImageMapper.insert(spuImage);
+            });
+        }
+        List<SpuPoster> spuPosterList = spuInfo.getSpuPosterList();
+        if (!CollectionUtils.isEmpty(spuPosterList)){
+            spuPosterList.forEach(spuPoster -> {
+                spuPoster.setSpuId(spuInfo.getId());
+                spuPosterMapper.insert(spuPoster);
+            });
+        }
+        List<SpuSaleAttr> spuSaleAttrList = spuInfo.getSpuSaleAttrList();
+        if (!CollectionUtils.isEmpty(spuSaleAttrList)){
+            spuSaleAttrList.forEach(spuSaleAttr -> {
+                spuSaleAttr.setSpuId(spuInfo.getId());
+                spuSaleAttrMapper.insert(spuSaleAttr);
+                List<SpuSaleAttrValue> spuSaleAttrValueList = spuSaleAttr.getSpuSaleAttrValueList();
+                if (!CollectionUtils.isEmpty(spuSaleAttrValueList)){
+                    spuSaleAttrValueList.forEach(spuSaleAttrValue -> {
+                        spuSaleAttrValue.setSpuId(spuInfo.getId());
+                        spuSaleAttrValue.setSaleAttrName(spuSaleAttr.getSaleAttrName());
+                        spuSaleAttrValueMapper.insert(spuSaleAttrValue);
+                    });
+                }
+            });
+        }
+    }
+
     @Override
     public List<BaseSaleAttr> getBaseSaleAttrList() {
 

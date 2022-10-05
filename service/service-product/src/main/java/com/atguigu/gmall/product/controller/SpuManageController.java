@@ -8,10 +8,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -43,5 +40,13 @@ public class SpuManageController {
     public Result getBaseSaleAttrList(){
         List<BaseSaleAttr> baseSaleAttrList=manageService.getBaseSaleAttrList();
         return Result.ok(baseSaleAttrList);
+    }
+
+//    接口路径：POST/admin/product/saveSpuInfo
+//    保存spuinfo
+    @PostMapping("saveSpuInfo")
+    public Result saveSpuInfo(@RequestBody SpuInfo spuInfo){
+        manageService.saveSpuInfo(spuInfo);
+        return Result.ok();
     }
 }

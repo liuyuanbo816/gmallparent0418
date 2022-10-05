@@ -34,4 +34,17 @@ public interface ManageService {
 
     List<BaseSaleAttr> getBaseSaleAttrList();
 
+    void saveSpuInfo(SpuInfo spuInfo);
+
+    List<SpuImage> getSpuImageList(Long spuId);
+
+    List<SpuSaleAttr> getSpuSaleAttrList(Long spuId);
+
+    void saveSkuInfo(SkuInfo skuInfo);
+
+    IPage getSkuInfoPage(Page<SkuInfo> skuInfoPage, SkuInfo skuInfo);
+
+    void onSale(Long skuId);
+
+    void cancelSale(Long skuId);
 }
