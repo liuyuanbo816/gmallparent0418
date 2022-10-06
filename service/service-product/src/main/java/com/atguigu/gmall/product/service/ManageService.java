@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -47,4 +48,14 @@ public interface ManageService {
     void onSale(Long skuId);
 
     void cancelSale(Long skuId);
+
+    SkuInfo getSkuInfo(Long skuId);
+
+    List<SpuPoster> getSpuPosterBySpuId(Long spuId);
+
+    BaseCategoryView getCategoryView(Long category3Id);
+
+    BigDecimal getSkuPrice(Long skuId);
+
+    List<SpuSaleAttr> getSpuSaleAttrListCheckBySku(Long skuId, Long spuId);
 }

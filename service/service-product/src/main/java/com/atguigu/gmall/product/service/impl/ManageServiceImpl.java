@@ -6,11 +6,13 @@ import com.atguigu.gmall.product.service.ManageService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -56,6 +58,38 @@ public class ManageServiceImpl implements ManageService {
     private SkuAttrValueMapper skuAttrValueMapper;
     @Resource
     private SkuSaleAttrValueMapper skuSaleAttrValueMapper;
+
+    @Resource
+    private BaseCategoryViewMapper baseCategoryViewMapper;
+
+    @Override
+    public List<SpuSaleAttr> getSpuSaleAttrListCheckBySku(Long skuId, Long spuId) {
+        return spuSaleAttrMapper.getSpuSaleAttrListCheckBySku(skuId,spuId);
+    }
+
+    @Override
+    public BigDecimal getSkuPrice(Long skuId) {
+        SkuInfo skuInfo = skuInfoMapper.selectOne(new QueryWrapper<SkuInfo>().eq("id", skuId).select("price"));
+        if (skuInfo!=null){
+            return skuInfo.getPrice();
+        }
+        return null;
+    }
+
+    @Override
+    public BaseCategoryView getCategoryView(Long category3Id) {
+        return baseCategoryViewMapper.selectById(category3Id);
+    }
+
+    @Override
+    public List<SpuPoster> getSpuPosterBySpuId(Long spuId) {
+        return spuPosterMapper.selectList(new QueryWrapper<SpuPoster>().eq("spu_id",spuId));
+    }
+
+    @Override
+    public SkuInfo getSkuInfo(Long skuId) {
+        return skuInfoMapper.selectById(skuId);
+    }
 
     @Override
     public void cancelSale(Long skuId) {
