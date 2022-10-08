@@ -40,4 +40,12 @@
         and bav.is_deleted=0
         order by bai.id,bav.id
     </select>
+
+    <select id="selectBaseAttrInfoListBySkuId" resultMap="BaseAttrInfoMap">
+        select <include refid="attrSql"></include>
+        from base_attr_info bai
+                          inner join base_attr_value bav on bav.attr_id=bai.id
+                          inner join sku_attr_value sav on sav.value_id=bav.id
+        where sku_id=#{skuId}
+    </select>
 </mapper>

@@ -3,10 +3,10 @@ package com.atguigu.gmall.product.service;
 import com.atguigu.gmall.model.product.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * title:
@@ -58,4 +58,8 @@ public interface ManageService {
     BigDecimal getSkuPrice(Long skuId);
 
     List<SpuSaleAttr> getSpuSaleAttrListCheckBySku(Long skuId, Long spuId);
+
+    Map getSkuValueIdsMap(Long spuId);
+
+    List<BaseAttrInfo> selectBaseAttrInfoListBySkuId(Long skuId);
 }

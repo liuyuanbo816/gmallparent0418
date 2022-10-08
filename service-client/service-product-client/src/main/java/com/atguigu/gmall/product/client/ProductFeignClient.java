@@ -1,9 +1,6 @@
 package com.atguigu.gmall.product.client;
 
-import com.atguigu.gmall.model.product.BaseCategoryView;
-import com.atguigu.gmall.model.product.SkuInfo;
-import com.atguigu.gmall.model.product.SpuPoster;
-import com.atguigu.gmall.model.product.SpuSaleAttr;
+import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.client.impl.ProductDegradeFeignClient;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * title:
@@ -34,4 +32,8 @@ public interface ProductFeignClient {
     @GetMapping("api/product/inner/getSpuSaleAttrListCheckBySku/{skuId}/{spuId}")
     public List<SpuSaleAttr> getSpuSaleAttrListCheckBySku(@PathVariable Long skuId,
                                                           @PathVariable Long spuId);
+    @GetMapping("api/product/inner/getSkuValueIdsMap/{spuId}")
+    Map getSkuValueIdsMap(@PathVariable Long spuId);
+    @GetMapping("api/product/inner/getAttrList/{skuId}")
+    List<BaseAttrInfo> selectBaseAttrInfoListBySkuId(@PathVariable Long skuId);
 }

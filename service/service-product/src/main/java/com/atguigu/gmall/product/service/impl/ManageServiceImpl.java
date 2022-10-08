@@ -6,14 +6,15 @@ import com.atguigu.gmall.product.service.ManageService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * title:
@@ -61,6 +62,23 @@ public class ManageServiceImpl implements ManageService {
 
     @Resource
     private BaseCategoryViewMapper baseCategoryViewMapper;
+
+    @Override
+    public List<BaseAttrInfo> selectBaseAttrInfoListBySkuId(Long skuId) {
+        return baseAttrInfoMapper.selectBaseAttrInfoListBySkuId(skuId);
+    }
+
+    @Override
+    public Map getSkuValueIdsMap(Long spuId) {
+        Map map=new HashMap();
+        List<Map> mapList=skuSaleAttrValueMapper.getSkuValueIdsMap(spuId);
+        if (!CollectionUtils.isEmpty(mapList)){
+            mapList.forEach(map1 -> {
+                map.put(map1.get("value_ids"),map1.get("sku_id"));
+            });
+        }
+        return map;
+    }
 
     @Override
     public List<SpuSaleAttr> getSpuSaleAttrListCheckBySku(Long skuId, Long spuId) {

@@ -1,9 +1,6 @@
 package com.atguigu.gmall.product.api;
 
-import com.atguigu.gmall.model.product.BaseCategoryView;
-import com.atguigu.gmall.model.product.SkuInfo;
-import com.atguigu.gmall.model.product.SpuPoster;
-import com.atguigu.gmall.model.product.SpuSaleAttr;
+import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.service.ManageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * title:
@@ -56,6 +54,17 @@ public class ProductApiController {
     public List<SpuSaleAttr> getSpuSaleAttrListCheckBySku(@PathVariable Long skuId,
                                                           @PathVariable Long spuId){
         return manageService.getSpuSaleAttrListCheckBySku(skuId,spuId);
+    }
+    //  商品切换数据
+    @GetMapping("inner/getSkuValueIdsMap/{spuId}")
+    public Map getSkuValueIdsMap(@PathVariable Long spuId){
+        return manageService.getSkuValueIdsMap(spuId);
+    }
+
+//        //  获取规格与包装
+    @GetMapping("inner/getAttrList/{skuId}")
+    public List<BaseAttrInfo> selectBaseAttrInfoListBySkuId(@PathVariable Long skuId){
+        return manageService.selectBaseAttrInfoListBySkuId(skuId);
     }
 
 }
