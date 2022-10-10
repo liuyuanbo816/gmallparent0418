@@ -1,9 +1,12 @@
 package com.atguigu.gmall.item.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.atguigu.gmall.common.constant.RedisConst;
 import com.atguigu.gmall.item.service.ItemService;
 import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.client.ProductFeignClient;
+import org.redisson.api.RBloomFilter;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -25,9 +28,16 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     private ProductFeignClient productFeignClient;
-    
+
+    @Autowired
+    private RedissonClient redissonClient;
+
     @Override
     public Map getItemBySkuId(Long skuId) {
+        RBloomFilter<Object> bloomFilter = redissonClient.getBloomFilter(RedisConst.SKU_BLOOM_FILTER);
+        if (!bloomFilter.contains(skuId)){
+            return new HashMap<>();
+        }
         SkuInfo skuInfo = productFeignClient.getSkuInfo(skuId);
         List<SpuPoster> spuPosterList= productFeignClient.findSpuPosterBySpuId(skuInfo.getSpuId());
         BaseCategoryView categoryView = productFeignClient.getCategoryView(skuInfo.getCategory3Id());
