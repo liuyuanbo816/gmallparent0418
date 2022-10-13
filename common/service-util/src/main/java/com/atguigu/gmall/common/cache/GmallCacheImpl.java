@@ -3,7 +3,6 @@ package com.atguigu.gmall.common.cache;
 import com.alibaba.fastjson.JSON;
 import com.atguigu.gmall.common.constant.RedisConst;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;

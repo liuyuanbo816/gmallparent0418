@@ -73,5 +73,12 @@ public class BaseManageController {
         return Result.ok(baseAttrInfo.getAttrValueList());
     }
 
+//    修改某个数据
+    @PutMapping("update")
+    public Result updateCategory3ById(@RequestBody BaseCategory3 baseCategory3){
+        manageService.updateCategory3ById(baseCategory3);
+        return Result.ok();
+    }
+
 
 }

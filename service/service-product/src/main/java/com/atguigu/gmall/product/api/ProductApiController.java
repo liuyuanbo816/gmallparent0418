@@ -1,6 +1,8 @@
 package com.atguigu.gmall.product.api;
 
+import com.alibaba.fastjson.JSONObject;
 import com.atguigu.gmall.model.product.*;
+import com.atguigu.gmall.product.service.BaseTrademarkService;
 import com.atguigu.gmall.product.service.ManageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +26,8 @@ public class ProductApiController {
 
     @Autowired
     private ManageService manageService;
+    @Autowired
+    private BaseTrademarkService baseTrademarkService;
 
     @GetMapping("inner/getSkuInfo/{skuId}")
     public SkuInfo getSkuInfo(@PathVariable Long skuId){
@@ -65,6 +69,17 @@ public class ProductApiController {
     @GetMapping("inner/getAttrList/{skuId}")
     public List<BaseAttrInfo> selectBaseAttrInfoListBySkuId(@PathVariable Long skuId){
         return manageService.selectBaseAttrInfoListBySkuId(skuId);
+    }
+
+//    将首页分类数据发给web-all
+    @GetMapping("getBaseCategoryList")
+    public List<JSONObject> getBaseCategoryList(){
+        return manageService.getCategoryList();
+    }
+
+    @GetMapping("inner/getTrademark/{tmId}")
+    public BaseTrademark getTrademark(@PathVariable Long tmId){
+        return baseTrademarkService.getById(tmId);
     }
 
 }
