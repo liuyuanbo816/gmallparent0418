@@ -2,6 +2,7 @@ package com.atguigu.gmall.item.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.atguigu.gmall.item.service.ItemService;
+import com.atguigu.gmall.list.client.ListFeignClient;
 import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.client.ProductFeignClient;
 import org.redisson.api.RedissonClient;
@@ -34,6 +35,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     private ThreadPoolExecutor threadPoolExecutor;
+    @Autowired
+    private ListFeignClient listFeignClient;
 
     @Override
     public Map getItemBySkuId(Long skuId) {
@@ -89,6 +92,11 @@ public class ItemServiceImpl implements ItemService {
             Map skuValueIdsMap = productFeignClient.getSkuValueIdsMap(skuInfo.getSpuId());
             String valueJson = JSON.toJSONString(skuValueIdsMap);
             map.put("valuesSkuJson", valueJson);
+        }, threadPoolExecutor);
+
+//        点击增加热度
+        CompletableFuture<Void> voidCompletableFuture = CompletableFuture.runAsync(() -> {
+            listFeignClient.incrHotScore(skuId);
         }, threadPoolExecutor);
         CompletableFuture.allOf(skuValueCompletableFuture,
                 baseAttrInfoCompletableFuture,

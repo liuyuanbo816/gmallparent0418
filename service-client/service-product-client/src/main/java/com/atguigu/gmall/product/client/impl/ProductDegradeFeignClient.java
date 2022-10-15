@@ -53,7 +53,7 @@ public class ProductDegradeFeignClient implements ProductFeignClient {
     }
 
     @Override
-    public BaseTrademark getTrademark(Long tmId) {
+    public BaseTrademark getTrademarkById(Long tmId) {
         return null;
     }
 

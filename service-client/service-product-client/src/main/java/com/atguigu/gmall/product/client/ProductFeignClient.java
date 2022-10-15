@@ -41,5 +41,5 @@ public interface ProductFeignClient {
     public List<JSONObject> getBaseCategoryList();
 
     @GetMapping("api/product/inner/getTrademark/{tmId}")
-    public BaseTrademark getTrademark(@PathVariable Long tmId);
+    public BaseTrademark getTrademarkById(@PathVariable Long tmId);
 }
