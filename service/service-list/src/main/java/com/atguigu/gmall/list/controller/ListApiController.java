@@ -3,10 +3,14 @@ package com.atguigu.gmall.list.controller;
 import com.atguigu.gmall.common.result.Result;
 import com.atguigu.gmall.list.service.SearchService;
 import com.atguigu.gmall.model.list.Goods;
+import com.atguigu.gmall.model.list.SearchParam;
+import com.atguigu.gmall.model.list.SearchResponseVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 /**
  * title:
@@ -49,5 +53,10 @@ public class ListApiController {
         return Result.ok();
     }
 
+    @PostMapping
+    public Result search(@RequestBody SearchParam searchParam){
+        SearchResponseVo searchResponseVo = searchService.search(searchParam);
+        return Result.ok(searchResponseVo);
+    }
 
 }
