@@ -63,6 +63,7 @@ public class AuthGlobalFilter implements GlobalFilter {
             return out(response, ResultCodeEnum.PERMISSION);
         }
         String userId=getUserId(request);
+        String userTempId=getUserTempId(request);
         if ("-1".equals(userId)){
             return out(response, ResultCodeEnum.PERMISSION);
         }
@@ -81,11 +82,30 @@ public class AuthGlobalFilter implements GlobalFilter {
                 }
             }
         }
-        if (!StringUtils.isEmpty(userId)){
-            request.mutate().header("userId",userId).build();
+        if (!StringUtils.isEmpty(userId)||!StringUtils.isEmpty(userTempId)){
+            if (!StringUtils.isEmpty(userId)){
+                request.mutate().header("userId",userId).build();
+            }
+            if (!StringUtils.isEmpty(userTempId)){
+                request.mutate().header("userTempId",userTempId).build();
+            }
             return chain.filter(exchange.mutate().request(request).build());
         }
         return chain.filter(exchange);
+    }
+
+    private String getUserTempId(ServerHttpRequest request) {
+        String userTempId="";
+        HttpCookie httpCookie= request.getCookies().getFirst("userTempId");
+        if (httpCookie!=null){
+            userTempId=httpCookie.getValue();
+        }else {
+            List<String> list = request.getHeaders().get("userTempId");
+            if (!CollectionUtils.isEmpty(list)){
+                userTempId=list.get(0);
+            }
+        }
+        return userTempId;
     }
 
     private String getUserId(ServerHttpRequest request) {
@@ -116,7 +136,6 @@ public class AuthGlobalFilter implements GlobalFilter {
         }
         return "";
     }
-
     private Mono<Void> out(ServerHttpResponse response, ResultCodeEnum resultCodeEnum) {
         Result<Object> result = Result.build(null, resultCodeEnum);
         String resultStr= JSON.toJSONString(result);

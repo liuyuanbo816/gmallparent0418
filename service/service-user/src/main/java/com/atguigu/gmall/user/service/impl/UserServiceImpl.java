@@ -26,6 +26,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserInfo login(UserInfo userInfo) {
         QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        userInfo.setEmail(userInfo.getLoginName());
+        userInfo.setPhoneNum(userInfo.getLoginName());
         queryWrapper.and(wrapper->wrapper.eq("login_name",userInfo.getLoginName()).
                 or().eq("phone_num",userInfo.getPhoneNum()).or().eq("email",userInfo.getEmail()));
         String passwd = null;
