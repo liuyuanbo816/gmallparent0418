@@ -69,5 +69,9 @@ public class CartApiController {
         cartService.deleteCart(skuId,userId);
         return Result.ok();
     }
-
+//获取选中商品列表
+    @GetMapping("getCartCheckedList/{userId}")
+    public List<CartInfo> getCartCheckedList(@PathVariable String userId){
+        return cartService.getCartCheckedList(userId);
+    }
 }
