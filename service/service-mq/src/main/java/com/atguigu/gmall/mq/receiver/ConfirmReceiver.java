@@ -1,5 +1,7 @@
 package com.atguigu.gmall.mq.receiver;
 
+import com.atguigu.gmall.mq.config.DeadLetterMqConfig;
+import com.atguigu.gmall.mq.config.DelayedMqConfig;
 import com.rabbitmq.client.Channel;
 import lombok.SneakyThrows;
 import org.springframework.amqp.core.Message;
@@ -7,7 +9,13 @@ import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * title:
@@ -17,6 +25,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConfirmReceiver {
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @SneakyThrows
     @RabbitListener(bindings = @QueueBinding(
@@ -39,4 +50,44 @@ public class ConfirmReceiver {
         }
         channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
     }
+
+    @SneakyThrows
+    @RabbitListener(queues = DeadLetterMqConfig.queue_dead_2)
+    public void getMsg2(String msg,Message message,Channel channel){
+        SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
+
+        System.out.println("接收时间"+sdf.format(new Date()));
+        System.out.println("接收消息"+msg);
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+    }
+//监听延迟插件
+
+    @SneakyThrows
+    @RabbitListener(queues = DelayedMqConfig.queue_delay_1)
+    public void getMsg3(String msg,Message message,Channel channel){
+//        设置一个key，确保不重复
+        String key=msg+":key";
+
+        Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "0", 30, TimeUnit.SECONDS);
+
+        if (!result){
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+            return;
+        }
+
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
+
+
+            System.out.println("接收时间"+sdf.format(new Date()));
+            System.out.println("接收消息"+msg);
+        } catch (Exception e) {
+            e.printStackTrace();
+            redisTemplate.delete(key);
+        }
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+    }
+
+
 }

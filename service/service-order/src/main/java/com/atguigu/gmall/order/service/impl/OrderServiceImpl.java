@@ -1,5 +1,7 @@
 package com.atguigu.gmall.order.service.impl;
 
+import com.atguigu.gmall.common.constant.MqConst;
+import com.atguigu.gmall.common.service.RabbitService;
 import com.atguigu.gmall.common.util.HttpClientUtil;
 import com.atguigu.gmall.model.enums.OrderStatus;
 import com.atguigu.gmall.model.enums.ProcessStatus;
@@ -8,8 +10,10 @@ import com.atguigu.gmall.model.order.OrderInfo;
 import com.atguigu.gmall.order.mapper.OrderDetailMapper;
 import com.atguigu.gmall.order.mapper.OrderInfoMapper;
 import com.atguigu.gmall.order.service.OrderService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -26,7 +30,7 @@ import java.util.*;
  * description:
  */
 @Service
-public class OrderServiceImpl implements OrderService {
+public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper,OrderInfo> implements OrderService {
     @Autowired
     private RedisTemplate redisTemplate;
 
@@ -36,10 +40,38 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderDetailMapper orderDetailMapper;
 
+    @Autowired
+    private RabbitService rabbitService;
+
     @Value("${ware.url}")
     private String wareUrl;
 
-//    从数据库中查询商品详情
+    @Override
+    public OrderInfo getOrderInfo(Long orderId) {
+        OrderInfo orderInfo = orderInfoMapper.selectById(orderId);
+        QueryWrapper<OrderDetail> queryWrapper = new QueryWrapper<>();
+        List<OrderDetail> orderDetailList = orderDetailMapper.selectList(queryWrapper.eq("order_id", orderId));
+        orderInfo.setOrderDetailList(orderDetailList);
+        return orderInfo;
+    }
+
+    //    取消订单
+    @Override
+    public void execExpiredOrder(Long orderId) {
+//改变订单状态
+        updateOrderStatus(orderId,ProcessStatus.CLOSED);
+    }
+
+    private void updateOrderStatus(Long orderId, ProcessStatus processStatus) {
+        OrderInfo orderInfo = new OrderInfo();
+        orderInfo.setId(orderId);
+        orderInfo.setProcessStatus(processStatus.name());
+        orderInfo.setOrderStatus(processStatus.getOrderStatus().name());
+        orderInfo.setUpdateTime(new Date());
+        orderInfoMapper.updateById(orderInfo);
+    }
+
+    //    从数据库中查询商品详情
     @Override
     public IPage<OrderInfo> getOrderPage(Page<OrderInfo> orderInfoPage, String userId) {
         IPage<OrderInfo> iPage=orderInfoMapper.selectOrderPage(orderInfoPage,userId);
@@ -77,6 +109,8 @@ public class OrderServiceImpl implements OrderService {
             });
         }
         Long orderId=orderInfo.getId();
+//发送延迟消息，过时取消订单
+        rabbitService.sendDelayMsg(MqConst.EXCHANGE_DIRECT_ORDER_CANCEL,MqConst.ROUTING_ORDER_CANCEL,orderId,MqConst.DELAY_TIME);
         return orderId;
     }
 

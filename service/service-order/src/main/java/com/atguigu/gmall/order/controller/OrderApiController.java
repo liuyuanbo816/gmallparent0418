@@ -59,10 +59,10 @@ public class OrderApiController {
     private RedisTemplate redisTemplate;
 
     @GetMapping("auth/trade")
-    public Result trade(HttpServletRequest request){
+    public Result trade(HttpServletRequest request) {
         String userId = AuthContextHolder.getUserId(request);
 
-        Map map=new HashMap<>();
+        Map map = new HashMap<>();
 
         List<UserAddress> userAddressList = userFeignClient.findUserAddressListByUserId(userId);
         List<CartInfo> cartCheckedList = cartFeignClient.getCartCheckedList(userId);
@@ -85,24 +85,24 @@ public class OrderApiController {
         orderInfo.setOrderDetailList(detailArrayList);
         orderInfo.sumTotalAmount();
 
-        map.put("userAddressList",userAddressList);
-        map.put("detailArrayList",detailArrayList);
-        map.put("totalNum",totalNum);
-        map.put("totalAmount",orderInfo.getTotalAmount());
-        map.put("tradeNo",orderService.getTradeNo(userId));
+        map.put("userAddressList", userAddressList);
+        map.put("detailArrayList", detailArrayList);
+        map.put("totalNum", totalNum);
+        map.put("totalAmount", orderInfo.getTotalAmount());
+        map.put("tradeNo", orderService.getTradeNo(userId));
         return Result.ok(map);
     }
 
-//    将订单信息封装到数据库中
+    //    将订单信息封装到数据库中
     @PostMapping("auth/submitOrder")
-    public Result saveOrderInfo(@RequestBody OrderInfo orderInfo,HttpServletRequest request){
+    public Result saveOrderInfo(@RequestBody OrderInfo orderInfo, HttpServletRequest request) {
         String userId = AuthContextHolder.getUserId(request);
 
         orderInfo.setUserId(Long.parseLong(userId));
         String tradeNo = request.getParameter("tradeNo");
 
-        boolean result=orderService.checkTradeNo(tradeNo,userId);
-        if (!result){
+        boolean result = orderService.checkTradeNo(tradeNo, userId);
+        if (!result) {
             return Result.fail().message("不能重复无刷新回退提交订单");
         }
         orderService.delTradeNo(userId);
@@ -110,10 +110,10 @@ public class OrderApiController {
         List<OrderDetail> orderDetailList = orderInfo.getOrderDetailList();
 
 //        准备线程集合
-        List<CompletableFuture> completableFutureList=new ArrayList<>();
+        List<CompletableFuture> completableFutureList = new ArrayList<>();
 //        错误信息集合
-        List<String> errorList=new ArrayList<>();
-        if (!CollectionUtils.isEmpty(orderDetailList)){
+        List<String> errorList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(orderDetailList)) {
             for (OrderDetail orderDetail : orderDetailList) {
 
                 CompletableFuture<Void> stockCompletableFuture = CompletableFuture.runAsync(() -> {
@@ -127,14 +127,14 @@ public class OrderApiController {
                 CompletableFuture<Void> priceCompletableFuture = CompletableFuture.runAsync(() -> {
                     BigDecimal skuPrice = productFeignClient.getSkuPrice(orderDetail.getSkuId());
                     BigDecimal orderPrice = orderDetail.getOrderPrice();
-                    if (skuPrice.compareTo(orderPrice)!=0){
-                        String msg=skuPrice.compareTo(orderPrice)==1?"涨价":"降价";
+                    if (skuPrice.compareTo(orderPrice) != 0) {
+                        String msg = skuPrice.compareTo(orderPrice) == 1 ? "涨价" : "降价";
 //                    更新购物车价格，修改redis
                         String userCartKey = RedisConst.USER_KEY_PREFIX + userId + RedisConst.USER_CART_KEY_SUFFIX;
                         CartInfo cartInfo = (CartInfo) redisTemplate.opsForHash().get(userCartKey, orderDetail.getSkuId().toString());
                         cartInfo.setSkuPrice(skuPrice);
-                        redisTemplate.opsForHash().put(userCartKey,orderDetail.getSkuId().toString(),cartInfo);
-                        errorList.add(orderDetail.getSkuId() + msg+skuPrice.subtract(orderPrice).abs());
+                        redisTemplate.opsForHash().put(userCartKey, orderDetail.getSkuId().toString(), cartInfo);
+                        errorList.add(orderDetail.getSkuId() + msg + skuPrice.subtract(orderPrice).abs());
                     }
                 }, threadPoolExecutor);
                 completableFutureList.add(priceCompletableFuture);
@@ -143,24 +143,29 @@ public class OrderApiController {
 
         CompletableFuture.allOf(completableFutureList.toArray(new CompletableFuture[completableFutureList.size()])).join();
 
-        if (errorList.size()>0){
-            return Result.fail().message(StringUtils.join(errorList,","));
+        if (errorList.size() > 0) {
+            return Result.fail().message(StringUtils.join(errorList, ","));
         }
-        Long orderId=orderService.saveOrderInfo(orderInfo);
+        Long orderId = orderService.saveOrderInfo(orderInfo);
         return Result.ok(orderId);
     }
 
-//      url: this.api_name + `/auth/${page}/${limit}`,
+    //      url: this.api_name + `/auth/${page}/${limit}`,
 //    我的订单页面
     @GetMapping("/auth/{page}/{limit}")
     public Result getOrderPage(@PathVariable Long page,
                                @PathVariable Long limit,
-                               HttpServletRequest request){
+                               HttpServletRequest request) {
         String userId = AuthContextHolder.getUserId(request);
         Page<OrderInfo> orderInfoPage = new Page<>(page, limit);
-        IPage<OrderInfo> iPage=orderService.getOrderPage(orderInfoPage,userId);
+        IPage<OrderInfo> iPage = orderService.getOrderPage(orderInfoPage, userId);
         return Result.ok(iPage);
     }
 
+    @GetMapping("inner/getOrderInfo/{orderId}")
+    public OrderInfo getOrderInfo(@PathVariable Long orderId) {
+        return orderService.getOrderInfo(orderId);
+
+    }
 
 }

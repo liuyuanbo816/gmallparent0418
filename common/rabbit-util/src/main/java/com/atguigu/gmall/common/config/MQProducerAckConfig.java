@@ -80,7 +80,15 @@ public class MQProducerAckConfig implements RabbitTemplate.ConfirmCallback,Rabbi
             retryCount++;
             gmallCorrelationData.setRetryCount(retryCount);
             redisTemplate.opsForValue().set(correlationData.getId(),JSON.toJSONString(gmallCorrelationData),90, TimeUnit.SECONDS);
-            rabbitTemplate.convertAndSend(gmallCorrelationData.getExchange(),gmallCorrelationData.getRoutingKey(),gmallCorrelationData.getMessage(),gmallCorrelationData);
+            if (gmallCorrelationData.isDelay()){
+                System.out.println("延迟消息");
+                rabbitTemplate.convertAndSend(gmallCorrelationData.getExchange(),gmallCorrelationData.getRoutingKey(),gmallCorrelationData.getMessage(),message -> {
+                    message.getMessageProperties().setDelay(gmallCorrelationData.getDelayTime()*1000);
+                    return message;
+                },gmallCorrelationData);
+            }else {
+                rabbitTemplate.convertAndSend(gmallCorrelationData.getExchange(),gmallCorrelationData.getRoutingKey(),gmallCorrelationData.getMessage(),gmallCorrelationData);
+            }
         }
     }
 }
